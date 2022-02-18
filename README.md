@@ -18,3 +18,11 @@ To get random 1st or surname name:
 fisrtname=GET_EMAIL.get_firstname()
 
 surname=GET_EMAIL.get_sndname()
+
+To Generate random address and telephone number:
+
+data['address'],data['tel']=gml.generate_address()
+
+for example: 'address': 'UnitedKingdom city.Bangor str.Bell Inn Yard h.63 ft.182' To generate specific email based on real name pass parameters:
+
+email=gml.generate_email(firstname=data['firstname'],secondname=data['sndname'])
