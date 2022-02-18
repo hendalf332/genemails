@@ -80,11 +80,16 @@ class GET_EMAIL:
 
     @classmethod    
     def generate_email(cls,firstname=None,secondname=None):
-        """generate an email address
+        """Generates random email from random names or from specified names in Args
+
+        Args:
+            firstname (str, optional): person's first name to for generating random email. Defaults to None.
+            secondname (str, optional): person's surname name to for generating random email. Defaults to None.
 
         Returns:
             str: string with email
-        """        
+        """   
+           
         fullname=''
         username=''
         firstnames=cls.firstnames
@@ -152,6 +157,11 @@ class GET_EMAIL:
         return sender 
     
     def generate_address(self):
+        """Generate random address and telephone number
+
+        Returns:
+            tuple: returns address string and random telephone number
+        """ 
         fstnm=choice(self.firstnames)
         sndname=choice(self.surnames)
         self.fstnm=fstnm
