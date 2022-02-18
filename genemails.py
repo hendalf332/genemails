@@ -22,14 +22,64 @@ class GET_EMAIL:
     emails=['gmail.com','outlook.com','tutanota.com','gmx.com','yahoo.com','aol.com','mail.com','zoho.com','protonmail.com','mailerlite.com','ukr.net','mail.ru','yandex.ru']
     firstnames=open(os.path.join(os.path.dirname(__file__), 'normalnames.txt'),'r').read().split('\n')
     surnames=open(os.path.join(os.path.dirname(__file__), 'familii.txt'),'r').read().split('\n')
-
+    fstnm=choice(firstnames)
+    sndname=choice(surnames)
+    streetsDict={}
+    citiesDict={}
+    address=''
+    cities=[]
+    street=[]
+    
     separator=['.','-','_','']
     cletters=string.ascii_uppercase
     def __init__(self):
-        pass
+        self.cities=open(os.path.join(os.path.dirname(__file__), 'city.txt'),'r').read().split('\n')
+        self.street=open(os.path.join(os.path.dirname(__file__), 'streets.txt'),'r').read().split('\n')
+        fstnm=choice(self.firstnames)
+        sndname=choice(self.surnames)
+        self.fstnm=fstnm
+        self.sndname=sndname
+        for city in self.cities:
+            elem=''
+            ln=len(city.split(':'))
+            if ln==3:
+                elem=city.split(':')[1]+':'+city.split(':')[2]
+            elif ln==2 :
+                elem=city.split(':')[1]
+            else:
+                continue
+            if city.split(':')[0] not in self.citiesDict:
+                self.citiesDict[city.split(':')[0]]=[elem]
+            else:
+                self.citiesDict[city.split(':')[0]].append(elem)
+                
+        for strt in self.street:
+            elem=''
+            ln=len(strt.split(':'))
+            if ln==3:
+                elem=strt.split(':')[1]+':'+strt.split(':')[2]
+            elif ln==2 :
+                elem=strt.split(':')[1]
+            else:
+                continue
+            if strt.split(':')[0] not in self.streetsDict:
+                self.streetsDict[strt.split(':')[0]]=[elem]
+            else:
+                self.streetsDict[strt.split(':')[0]].append(elem)                
         
+    
+    @classmethod
+    def get_firstname(cls):
+        
+        return choice(cls.firstnames)
+
+
+    @classmethod
+    def get_sndname(cls):
+        return choice(cls.surnames)
+
     @classmethod    
-    def generate_email(cls):
+    def generate_email(cls,firstname=None,secondname=None):
         """generate an email address
 
         Returns:
@@ -37,7 +87,6 @@ class GET_EMAIL:
         """        
         fullname=''
         username=''
-        
         firstnames=cls.firstnames
         separator=cls.separator
         surnames=cls.surnames
@@ -47,8 +96,16 @@ class GET_EMAIL:
         for _ in range(randint(3,9)):
             username+=secrets.choice(string.ascii_lowercase)    
         typ=randint(1,9)
-        fstnm=choice(cls.firstnames)
-        sndname=choice(cls.surnames)
+        if not firstname and not secondname:
+            fstnm=choice(cls.firstnames)
+            sndname=choice(cls.surnames)
+            cls.fstnm=fstnm
+            cls.sndname=sndname
+        else:
+            fstnm=firstname
+            sndname=secondname
+            cls.fstnm=fstnm
+            cls.sndname=sndname
         if fstnm.endswith('a') and not ( sndname.endswith('a') or sndname.endswith('o')):
             sndname+='a'
         if not fstnm.endswith('a') and sndname.endswith('a'):
@@ -56,25 +113,27 @@ class GET_EMAIL:
         if typ==1:
             fullname=fstnm+choice(separator)+sndname+'@'+choice(emails)
         elif typ==2:
-            fullname=choice(cletters)+choice(separator)+choice(surnames)+'@'+choice(emails)
+            fullname=choice(cletters)+choice(separator)+sndname+'@'+choice(emails)
         elif typ==3:
             fullname=fstnm+choice(separator)+sndname+choice(separator)+ str(randint(1900,2030))+'@'+choice(emails)
         elif typ==4:
             fullname=fstnm+choice(separator)+ str(randint(1900,2030))+'@'+choice(emails)   
         elif typ==5:
-            fullname=choice(cletters)+ choice(surnames)+choice(separator)+ str(randint(1960,2018)) +'@'+choice(emails) 
+            fullname=choice(cletters)+ sndname+choice(separator)+ str(randint(1960,2018)) +'@'+choice(emails) 
         elif typ==6:
-            fullname=choice(firstnames)+choice(separator)+ username +'@'+choice(emails)
+            fullname=fstnm+choice(separator)+ username +'@'+choice(emails)
         elif typ==7:
-            fullname=fstnm+username+ sndname +'@'+choice(emails)  
+            fullname=fstnm+ username +sndname +'@'+choice(emails)  
         elif typ==8:
-            fullname=choice(surnames)+ choice(separator) + username +'@'+choice(emails)    
+            fullname=sndname+ choice(separator) + username +'@'+choice(emails) 
+        else:
+            fullname=username+ choice(separator) + fstnm  +'@'+choice(emails)
         if cls.prevemail!=fullname:
             cls.prevemail=fullname
             return fullname
         else:
             cls.prevemail=fullname
-            return None
+            return "admin"+username+choice(emails)  
         
     @classmethod
     def generate_emails(cls,num):
@@ -90,7 +149,34 @@ class GET_EMAIL:
         emails=[ GET_EMAIL.generate_email() for i in range(1,num+1)]
         emails = [mail for mail in emails if mail]
         sender=", ".join(emails)
-        return sender        
+        return sender 
+    
+    def generate_address(self):
+        fstnm=choice(self.firstnames)
+        sndname=choice(self.surnames)
+        self.fstnm=fstnm
+        self.sndname=sndname
+
+        countries=list(self.citiesDict.keys())
+        country=choice(countries)
+        mycity=choice(list(self.citiesDict[country]))
+        mystreet=choice(self.streetsDict[country])
+        ln=len(mycity.split(':'))
+        if ln==2:
+            elem=mycity.split(':')[0]+', st.'+mycity.split(':')[1]
+        elif ln==1 :
+            elem=mycity.split(':')[0]
+        address=country +' city.'+elem+' '+mystreet+' h.'+str(randint(1,300))+' ft.'+str(randint(1,300))
+        if country=='Germany':
+            tel='+49'+"".join([str(randint(1,10)) for i in range(1,randint(6,13+1))])
+        elif country=='UnitedKingdom':
+            tel='+44'+"".join([str(randint(1,10)) for i in range(1,randint(7,10+1))])
+        elif country=='UnitedStates':
+            tel='+1'+"".join([str(randint(1,10)) for i in range(1,10+1)])
+        elif country=='Ukraine':
+            tel='+380'+"".join([str(randint(1,10)) for i in range(1,9+1)]) 
+        return address,tel
+        
 
 def print_with_color(s, color=Fore.WHITE, brightness=Style.NORMAL, **kwargs):
     """Utility function wrapping the regular `print()` function 
